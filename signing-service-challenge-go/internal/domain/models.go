@@ -13,7 +13,7 @@ var (
 	AlgorithmTypeRSA     AlgorithmType = "RSA"
 )
 
-type SignatureDevice struct {
+type Device struct {
 	ID            string
 	AlgorithmType AlgorithmType
 	Label         *string
@@ -36,8 +36,8 @@ type DeviceSigner struct {
 	PrivateKey    []byte
 }
 
-// SignedCreations I am not sure if we need this at this time, but for historic reasons I am leaving it here
-type SignedCreations struct {
+// Signings I am not sure if we need this at this time, but for historic reasons I am leaving it here
+type Signings struct {
 	ID         string
 	DeviceId   string
 	Counter    int64

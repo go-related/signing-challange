@@ -1,4 +1,4 @@
-package signature_device
+package device
 
 import (
 	"fmt"
@@ -8,30 +8,36 @@ import (
 	"net/http"
 )
 
-type SignatureDeviceRepository interface {
-	Save(device domain.SignatureDevice) error
-	FindByID(id string) (*domain.SignatureDevice, error)
-	GetAll(pageNr int, pageSize int) ([]*domain.SignatureDevice, int, error)
+type DeviceService interface {
+	GetById(id string) (*domain.Device, error)
+	Save(input *domain.Device) error
+	GetAll(pageNr int, pageSize int) ([]*domain.Device, int, error)
+}
+
+type DeviceRepository interface {
+	Save(device domain.Device) error
+	FindByID(id string) (*domain.Device, error)
+	GetAll(pageNr int, pageSize int) ([]*domain.Device, int, error)
 }
 
 type SignatureDeviceServiceImpl struct {
-	repository SignatureDeviceRepository
+	repository DeviceRepository
 }
 
-func NewDeviceService(repository SignatureDeviceRepository) *SignatureDeviceServiceImpl {
+func NewDeviceService(repository DeviceRepository) *SignatureDeviceServiceImpl {
 	return &SignatureDeviceServiceImpl{
 		repository: repository,
 	}
 }
 
-func (s *SignatureDeviceServiceImpl) GetAll(pageNr int, pageSize int) ([]*domain.SignatureDevice, int, error) {
+func (s *SignatureDeviceServiceImpl) GetAll(pageNr int, pageSize int) ([]*domain.Device, int, error) {
 	if pageNr < 1 || pageSize < 1 {
 		return nil, 0, services.NewServiceError("invalid page number or page size", http.StatusBadRequest)
 	}
 	return s.repository.GetAll(pageNr, pageSize)
 }
 
-func (s *SignatureDeviceServiceImpl) GetById(id string) (*domain.SignatureDevice, error) {
+func (s *SignatureDeviceServiceImpl) GetById(id string) (*domain.Device, error) {
 	device, err := s.repository.FindByID(id)
 	if err != nil || device == nil {
 		return nil, err
@@ -39,7 +45,7 @@ func (s *SignatureDeviceServiceImpl) GetById(id string) (*domain.SignatureDevice
 	return device, nil
 }
 
-func (s *SignatureDeviceServiceImpl) Save(input *domain.SignatureDevice) error {
+func (s *SignatureDeviceServiceImpl) Save(input *domain.Device) error {
 	if input == nil {
 		return services.NewServiceError(fmt.Sprintf("invalid request"), http.StatusBadRequest)
 

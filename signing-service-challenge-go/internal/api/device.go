@@ -8,20 +8,20 @@ import (
 	"strings"
 )
 
-type SigningDeviceDTO struct {
+type DeviceDTO struct {
 	Id        string  `json:"id"`        // for simplicity, we are not going to check if this is uuid
 	Algorithm string  `json:"algorithm"` // the validation is done on the service level, so we delegate the check there
 	Label     *string `json:"label,omitempty"`
 	Counter   int     `json:"signature_counter"`
 }
 
-func (s *Server) CreateSigningDevice(response http.ResponseWriter, request *http.Request) {
+func (s *Server) CreateDevice(response http.ResponseWriter, request *http.Request) {
 	if request.Method != http.MethodPost {
 		WriteErrorResponse(response, http.StatusMethodNotAllowed, nil, http.StatusText(http.StatusMethodNotAllowed))
 		return
 	}
 
-	var device SigningDeviceDTO
+	var device DeviceDTO
 	if err := json.NewDecoder(request.Body).Decode(&device); err != nil {
 		WriteErrorResponse(response, http.StatusBadRequest, err, "Invalid request payload")
 		return
@@ -43,7 +43,7 @@ func (s *Server) CreateSigningDevice(response http.ResponseWriter, request *http
 	WriteAPIResponse(response, http.StatusCreated, output)
 }
 
-func (s *Server) GetSigningDeviceById(response http.ResponseWriter, request *http.Request) {
+func (s *Server) GetDeviceById(response http.ResponseWriter, request *http.Request) {
 	if request.Method != http.MethodGet {
 		WriteErrorResponse(response, http.StatusMethodNotAllowed, nil, http.StatusText(http.StatusMethodNotAllowed))
 		return
@@ -94,11 +94,11 @@ func (s *Server) GetAllDevices(response http.ResponseWriter, request *http.Reque
 	WriteAPIResponse(response, http.StatusOK, output)
 }
 
-func convertDeviceDTOtoDomainModel(input *SigningDeviceDTO) *domain.SignatureDevice {
+func convertDeviceDTOtoDomainModel(input *DeviceDTO) *domain.Device {
 	if input == nil {
 		return nil
 	}
-	return &domain.SignatureDevice{
+	return &domain.Device{
 		ID:            input.Id,
 		Label:         input.Label,
 		Counter:       int64(input.Counter),
@@ -106,11 +106,11 @@ func convertDeviceDTOtoDomainModel(input *SigningDeviceDTO) *domain.SignatureDev
 	}
 }
 
-func convertDeviceDomainModelToDTO(input *domain.SignatureDevice) *SigningDeviceDTO {
+func convertDeviceDomainModelToDTO(input *domain.Device) *DeviceDTO {
 	if input == nil {
 		return nil
 	}
-	return &SigningDeviceDTO{
+	return &DeviceDTO{
 		Id:        input.ID,
 		Label:     input.Label,
 		Counter:   int(input.Counter),
@@ -118,15 +118,15 @@ func convertDeviceDomainModelToDTO(input *domain.SignatureDevice) *SigningDevice
 	}
 }
 
-func convertDeviceListDomainModelToDTO(input *[]*domain.SignatureDevice, page, pageSize, total int) *PaginatedResponse[SigningDeviceDTO] {
+func convertDeviceListDomainModelToDTO(input *[]*domain.Device, page, pageSize, total int) *PaginatedResponse[DeviceDTO] {
 	if input == nil {
 		return nil
 	}
-	var results []SigningDeviceDTO
+	var results []DeviceDTO
 	for _, device := range *input {
 		results = append(results, *convertDeviceDomainModelToDTO(device))
 	}
-	return &PaginatedResponse[SigningDeviceDTO]{
+	return &PaginatedResponse[DeviceDTO]{
 		Items:      results,
 		Total:      total,
 		PageNumber: page,

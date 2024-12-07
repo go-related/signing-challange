@@ -47,7 +47,7 @@ func TestGetAll(t *testing.T) {
 			// prepare
 			store := NewInMemoryStorage()
 			for i := 0; i < test.totalElements; i++ {
-				if err := store.Save(domain.SignatureDevice{ID: strconv.Itoa(i), Counter: int64(i)}); err != nil {
+				if err := store.Save(domain.Device{ID: strconv.Itoa(i), Counter: int64(i)}); err != nil {
 					t.Error(err)
 				}
 			}

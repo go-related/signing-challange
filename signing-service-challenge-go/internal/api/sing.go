@@ -7,12 +7,12 @@ import (
 	"strconv"
 )
 
-type SigningCreationInputDTO struct {
+type SigningInputDTO struct {
 	DeviceID string `json:"device_id"`
 	Data     string `json:"data"`
 }
 
-type SigningCreationResultDTO struct {
+type SigningResultDTO struct {
 	Signature  string `json:"signature"`
 	SignedData string `json:"signed_data"`
 }
@@ -23,26 +23,26 @@ func (s *Server) CreateSigning(response http.ResponseWriter, request *http.Reque
 		return
 	}
 
-	var input SigningCreationInputDTO
+	var input SigningInputDTO
 	if err := json.NewDecoder(request.Body).Decode(&input); err != nil {
 		WriteErrorResponse(response, http.StatusBadRequest, err, "Invalid request payload")
 		return
 	}
 
-	signature, signedData, err := s.signatureService.SignTransaction(input.DeviceID, []byte(input.Data))
+	signature, signedData, err := s.signatureService.Sign(input.DeviceID, []byte(input.Data))
 	if err != nil {
 		WriteErrorResponse(response, http.StatusInternalServerError, err, http.StatusText(http.StatusInternalServerError))
 		return
 	}
 
-	output := SigningCreationResultDTO{
+	output := SigningResultDTO{
 		Signature:  signature,
 		SignedData: signedData,
 	}
 	WriteAPIResponse(response, http.StatusCreated, output)
 }
 
-func (s *Server) GetAllSigningCreations(response http.ResponseWriter, request *http.Request) {
+func (s *Server) GetAllSignings(response http.ResponseWriter, request *http.Request) {
 	if request.Method != http.MethodGet {
 		WriteErrorResponse(response, http.StatusMethodNotAllowed, nil, http.StatusText(http.StatusMethodNotAllowed))
 		return
@@ -65,34 +65,34 @@ func (s *Server) GetAllSigningCreations(response http.ResponseWriter, request *h
 		return
 	}
 
-	list, totalCount, err := s.signatureService.GetAllSigningCreations(deviceId, pageNr, pageSize)
+	list, totalCount, err := s.signatureService.GetAllSignings(deviceId, pageNr, pageSize)
 	if err != nil {
 		WriteErrorResponse(response, http.StatusInternalServerError, err, "Failed to retrieve devices")
 		return
 	}
 
-	output := convertSignatureListDomainModelToDTO(&list, pageNr, pageSize, totalCount)
+	output := convertSigningListDomainModelToDTO(&list, pageNr, pageSize, totalCount)
 	WriteAPIResponse(response, http.StatusOK, output)
 }
 
-func convertSignatureListDomainModelToDTO(i *[]*domain.SignedCreations, page int, size int, total int) *PaginatedResponse[SigningCreationResultDTO] {
+func convertSigningListDomainModelToDTO(i *[]*domain.Signings, page int, size int, total int) *PaginatedResponse[SigningResultDTO] {
 	if i == nil {
-		return &PaginatedResponse[SigningCreationResultDTO]{
+		return &PaginatedResponse[SigningResultDTO]{
 			Items: nil,
 			Total: total,
 		}
 	}
 
-	var items []SigningCreationResultDTO
+	var items []SigningResultDTO
 	for _, item := range *i {
 		if item != nil {
-			items = append(items, SigningCreationResultDTO{
+			items = append(items, SigningResultDTO{
 				Signature:  item.Signature,
 				SignedData: item.SignedData,
 			})
 		}
 	}
-	return &PaginatedResponse[SigningCreationResultDTO]{
+	return &PaginatedResponse[SigningResultDTO]{
 		Items:      items,
 		Total:      total,
 		PageNumber: page,

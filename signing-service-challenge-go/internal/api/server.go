@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/fiskaly/coding-challenges/signing-service-challenge/internal/services"
-	signaturecreation "github.com/fiskaly/coding-challenges/signing-service-challenge/internal/services/signature-creation"
-	signaturedevice "github.com/fiskaly/coding-challenges/signing-service-challenge/internal/services/signature-device"
+	deviceService "github.com/fiskaly/coding-challenges/signing-service-challenge/internal/services/device"
+	signService "github.com/fiskaly/coding-challenges/signing-service-challenge/internal/services/sign"
 	"github.com/sirupsen/logrus"
 	"net/http"
 )
@@ -25,12 +25,12 @@ type PaginatedResponse[T any] struct {
 // Server manages HTTP requests and dispatches them to the appropriate services.
 type Server struct {
 	listenAddress    string
-	deviceService    signaturedevice.SignatureDeviceService
-	signatureService signaturecreation.SignatureService
+	deviceService    deviceService.DeviceService
+	signatureService signService.SignService
 }
 
 // NewServer is a factory to instantiate a new Server.
-func NewServer(listenAddress string, deviceService signaturedevice.SignatureDeviceService, signatureService signaturecreation.SignatureService) *Server {
+func NewServer(listenAddress string, deviceService deviceService.DeviceService, signatureService signService.SignService) *Server {
 	return &Server{
 		listenAddress:    listenAddress,
 		deviceService:    deviceService,
@@ -45,13 +45,13 @@ func (s *Server) Run() error {
 	mux.Handle("/api/v0/health", http.HandlerFunc(s.Health))
 
 	// signature-devices
-	mux.Handle("/api/v0/signature-device", http.HandlerFunc(s.CreateSigningDevice))
-	mux.Handle("/api/v0/signature-device/", http.HandlerFunc(s.GetSigningDeviceById))
-	mux.Handle("/api/v0/signature-devices", http.HandlerFunc(s.GetAllDevices))
+	mux.Handle("/api/v0/device", http.HandlerFunc(s.CreateDevice))
+	mux.Handle("/api/v0/device/", http.HandlerFunc(s.GetDeviceById))
+	mux.Handle("/api/v0/devices", http.HandlerFunc(s.GetAllDevices))
 
 	// signing-creation
-	mux.Handle("/api/v0/signing-creation", http.HandlerFunc(s.CreateSigning))
-	mux.Handle("/api/v0/signing-creations", http.HandlerFunc(s.GetAllSigningCreations))
+	mux.Handle("/api/v0/sign", http.HandlerFunc(s.CreateSigning))
+	mux.Handle("/api/v0/signings", http.HandlerFunc(s.GetAllSignings))
 
 	return http.ListenAndServe(s.listenAddress, mux)
 }

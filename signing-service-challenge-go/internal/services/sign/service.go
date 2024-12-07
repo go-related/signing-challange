@@ -1,4 +1,4 @@
-package signature_creation
+package sign
 
 import (
 	"encoding/base64"
@@ -10,25 +10,30 @@ import (
 	"sync"
 )
 
-type SignatureDeviceRepository interface {
-	FindByID(id string) (*domain.SignatureDevice, error)
-	GetAllSigningCreations(deviceId string, pageNr int, pageSize int) ([]*domain.SignedCreations, int, error)
+type SignService interface {
+	Sign(deviceID string, data []byte) (string, string, error)
+	GetAllSignings(deviceId string, pageNr int, pageSize int) ([]*domain.Signings, int, error)
+}
+
+type SignRepository interface {
+	FindByID(id string) (*domain.Device, error)
+	GetAllSignings(deviceId string, pageNr int, pageSize int) ([]*domain.Signings, int, error)
 	GetDeviceCounterAndLastEncoded(id string) (int64, string, error)
 	SaveDeviceCounterAndLastEncoded(id string, counter int64, currentSignature, data string) error
 }
 
-type SignatureCreation struct {
-	repository SignatureDeviceRepository
+type SignServiceImpl struct {
+	repository SignRepository
 	counterMu  sync.Mutex
 }
 
-func NewSignatureCreation(repository SignatureDeviceRepository) *SignatureCreation {
-	return &SignatureCreation{
+func NewSignService(repository SignRepository) *SignServiceImpl {
+	return &SignServiceImpl{
 		repository: repository,
 		counterMu:  sync.Mutex{},
 	}
 }
-func (sc *SignatureCreation) GetAllSigningCreations(deviceId string, pageNr int, pageSize int) ([]*domain.SignedCreations, int, error) {
+func (sc *SignServiceImpl) GetAllSignings(deviceId string, pageNr int, pageSize int) ([]*domain.Signings, int, error) {
 	if deviceId == "" {
 		return nil, 0, services.NewServiceError("deviceId is required", http.StatusBadRequest)
 	}
@@ -39,10 +44,10 @@ func (sc *SignatureCreation) GetAllSigningCreations(deviceId string, pageNr int,
 		return nil, 0, services.NewServiceError("pageSize is required", http.StatusBadRequest)
 	}
 
-	return sc.repository.GetAllSigningCreations(deviceId, pageNr, pageSize)
+	return sc.repository.GetAllSignings(deviceId, pageNr, pageSize)
 }
 
-func (sc *SignatureCreation) SignTransaction(deviceID string, data []byte) (string, string, error) {
+func (sc *SignServiceImpl) Sign(deviceID string, data []byte) (string, string, error) {
 	if deviceID == "" {
 		return "", "", services.NewServiceError("device_id is a required field", http.StatusBadRequest)
 	}
@@ -66,15 +71,17 @@ func (sc *SignatureCreation) SignTransaction(deviceID string, data []byte) (stri
 	return signature, signedData, nil
 }
 
-func (sc *SignatureCreation) signTransaction(device *domain.SignatureDevice, data []byte) (string, string, error) {
+func (sc *SignServiceImpl) signTransaction(device *domain.Device, data []byte) (string, string, error) {
 	signer, err := sc.loadKeyFromDevice(device)
 	if err != nil {
 		return "", "", err
 	}
+
 	signature, err := signer.Sign(data)
 	if err != nil {
 		return "", "", err
 	}
+
 	currentSignatureEncoded := base64.StdEncoding.EncodeToString(signature)
 
 	sc.counterMu.Lock()
@@ -99,7 +106,7 @@ func (sc *SignatureCreation) signTransaction(device *domain.SignatureDevice, dat
 	return currentSignatureEncoded, signedData, nil
 }
 
-func (sc *SignatureCreation) loadKeyFromDevice(device *domain.SignatureDevice) (crypto.Signer, error) {
+func (sc *SignServiceImpl) loadKeyFromDevice(device *domain.Device) (crypto.Signer, error) {
 	marshaller, err := crypto.CreateMarshaller(device.AlgorithmType)
 	if err != nil {
 		return nil, err
