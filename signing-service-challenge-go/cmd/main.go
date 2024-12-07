@@ -7,7 +7,6 @@ import (
 	signaturecreation "github.com/fiskaly/coding-challenges/signing-service-challenge/internal/services/signature-creation"
 	signaturedevice "github.com/fiskaly/coding-challenges/signing-service-challenge/internal/services/signature-device"
 	"github.com/sirupsen/logrus"
-	"log"
 )
 
 func main() {
@@ -32,8 +31,11 @@ func runServer(config *configuration.Configuration) error {
 
 	server := api.NewServer(config.ListenAddress, signatureService, signatureCreationService)
 
-	if err := server.Run(); err != nil {
-		log.Fatal("Could not start server on ", config.ListenAddress)
+	logrus.Info("starting server on port " + config.ListenAddress)
+	err := server.Run()
+	if err != nil {
+		return err
 	}
+
 	return nil
 }

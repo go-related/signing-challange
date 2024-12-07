@@ -9,10 +9,10 @@ import (
 )
 
 type SigningDeviceDTO struct {
-	Id        string  `json:"id"`
+	Id        string  `json:"id"`        // for simplicity we are not gonna check if this is a uuid
 	Algorithm string  `json:"algorithm"` // the validation is done on the service level, so we delegate the check there
 	Label     *string `json:"label,omitempty"`
-	Counter   int     `json:"counter"`
+	Counter   int     `json:"signature_counter"`
 }
 
 func (s *Server) CreateSigningDevice(response http.ResponseWriter, request *http.Request) {

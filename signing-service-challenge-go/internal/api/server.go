@@ -44,10 +44,14 @@ func (s *Server) Run() error {
 
 	mux.Handle("/api/v0/health", http.HandlerFunc(s.Health))
 
-	//signature-devices
+	// signature-devices
 	mux.Handle("/api/v0/signature-device", http.HandlerFunc(s.CreateSigningDevice))
 	mux.Handle("/api/v0/signature-device/", http.HandlerFunc(s.GetSigningDeviceById))
 	mux.Handle("/api/v0/signature-devices", http.HandlerFunc(s.GetAllDevices))
+
+	// signing-creation
+	mux.Handle("/api/v0/signing-creation", http.HandlerFunc(s.CreateSigning))
+	mux.Handle("/api/v0/signing-creations", http.HandlerFunc(s.GetAllSigningCreations))
 
 	return http.ListenAndServe(s.listenAddress, mux)
 }
@@ -56,11 +60,22 @@ func (s *Server) Run() error {
 // and writes those as an HTTP error response in a structured format.
 func WriteErrorResponse(w http.ResponseWriter, status int, err error, message string) {
 
-	// we check if the error type is like this than meas it's a bad request
-	var badRequest *services.ServiceError
-	if errors.As(err, &badRequest) {
-		status = badRequest.Status
-		message = err.Error()
+	if err != nil {
+		logrus.Error(err)
+
+		// validation error
+		var badRequest *services.ServiceError
+		if errors.As(err, &badRequest) {
+			status = badRequest.Status
+			message = err.Error()
+		}
+
+		// custom db-level error
+		var dbError *services.DBError
+		if errors.As(err, &dbError) {
+			status = http.StatusBadRequest
+			message = err.Error()
+		}
 	}
 
 	w.WriteHeader(status)
@@ -90,7 +105,7 @@ func WriteAPIResponse[T any](w http.ResponseWriter, statusCode int, data T) {
 	bytes, err := json.MarshalIndent(response, "", "  ")
 	if err != nil {
 		logrus.WithError(err).Error("failed to marshal response")
-		WriteErrorResponse(w, http.StatusInternalServerError, err, "failed to marshal response")
+		return
 	}
 
 	_, err = w.Write(bytes)

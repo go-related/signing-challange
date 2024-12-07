@@ -36,10 +36,11 @@ type DeviceSigner struct {
 	PrivateKey    []byte
 }
 
-// SignedTransactions I am not sure if we need this at this time, but for historic reasons i am leaving it here
-type SignedTransactions struct {
-	ID        string
-	DeviceId  string
-	Counter   int64
-	Signature string
+// SignedCreations I am not sure if we need this at this time, but for historic reasons i am leaving it here
+type SignedCreations struct {
+	ID         string
+	DeviceId   string
+	Counter    int64
+	Signature  string
+	SignedData string
 }
