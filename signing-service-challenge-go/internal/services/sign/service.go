@@ -25,7 +25,6 @@ type SignRepository interface {
 
 type CryptoFactory interface {
 	CreateMarshaller(input domain.AlgorithmType) (crypto.AlgorithmMarshaller, error)
-	GenerateAlgorithm(input domain.AlgorithmType) (crypto.Signer, error)
 }
 
 type SignServiceImpl struct {

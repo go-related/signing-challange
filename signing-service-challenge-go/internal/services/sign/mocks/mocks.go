@@ -1,8 +1,9 @@
 package mocks
 
 import (
-	"github.com/fiskaly/coding-challenges/signing-service-challenge/internal/domain"
 	"github.com/stretchr/testify/mock"
+
+	"github.com/fiskaly/coding-challenges/signing-service-challenge/internal/domain"
 )
 
 type MockSignRepository struct {

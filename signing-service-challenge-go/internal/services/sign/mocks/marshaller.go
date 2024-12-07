@@ -1,8 +1,9 @@
 package mocks
 
 import (
-	"github.com/fiskaly/coding-challenges/signing-service-challenge/internal/crypto"
 	"github.com/stretchr/testify/mock"
+
+	"github.com/fiskaly/coding-challenges/signing-service-challenge/internal/crypto"
 )
 
 type MockMarshaller struct {

@@ -2,6 +2,7 @@ package device
 
 import (
 	"fmt"
+	"github.com/fiskaly/coding-challenges/signing-service-challenge/internal/crypto"
 	"strconv"
 	"testing"
 
@@ -12,7 +13,7 @@ import (
 	"github.com/fiskaly/coding-challenges/signing-service-challenge/internal/services/device/mocks"
 )
 
-func TestGetAllValidity(t *testing.T) {
+func TestGetAll(t *testing.T) {
 	tests := []struct {
 		name                 string
 		inputPageNumber      int
@@ -71,7 +72,7 @@ func TestGetAllValidity(t *testing.T) {
 					Return(test.mockData.Devices, test.mockData.TotalCount, test.mockData.Error)
 			}
 
-			service := NewDeviceService(mockRepo)
+			service := NewDeviceService(mockRepo, nil)
 
 			// execute
 			devices, totalCount, err := service.GetAll(test.inputPageNumber, test.inputPageSize)
@@ -117,7 +118,7 @@ func TestGetById(t *testing.T) {
 			mockRepo.On("FindByID", test.inputDeviceId).
 				Return(test.mockDevice, test.mockError)
 
-			service := NewDeviceService(mockRepo)
+			service := NewDeviceService(mockRepo, nil)
 
 			// execute
 			device, err := service.GetById(test.inputDeviceId)
@@ -194,7 +195,9 @@ func TestSave(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			mockRepo := new(mocks.MockDeviceRepository)
-			service := NewDeviceService(mockRepo)
+			// usually we need to mock things here but for simplicity we can use the real one
+			factory := crypto.NewFactory()
+			service := NewDeviceService(mockRepo, factory)
 			if !test.expectedServiceError {
 				mockRepo.On("Save", mock.Anything).Return(test.mockError)
 			}

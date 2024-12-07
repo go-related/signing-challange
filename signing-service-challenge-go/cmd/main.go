@@ -29,7 +29,7 @@ func runServer(config *configuration.Configuration) error {
 
 	//services
 	factory := crypto.NewFactory()
-	deviceSrv := deviceService.NewDeviceService(storage)
+	deviceSrv := deviceService.NewDeviceService(storage, factory)
 	signSrv := signService.NewSignService(storage, factory)
 
 	server := api.NewServer(config.ListenAddress, deviceSrv, signSrv)

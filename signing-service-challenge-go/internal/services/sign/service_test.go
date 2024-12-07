@@ -2,10 +2,12 @@ package sign
 
 import (
 	"errors"
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+
 	"github.com/fiskaly/coding-challenges/signing-service-challenge/internal/domain"
 	"github.com/fiskaly/coding-challenges/signing-service-challenge/internal/services/sign/mocks"
-	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func TestGetAllSignings(t *testing.T) {

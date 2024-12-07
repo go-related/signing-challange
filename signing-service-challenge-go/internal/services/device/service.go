@@ -21,13 +21,20 @@ type DeviceRepository interface {
 	GetAll(pageNr int, pageSize int) ([]*domain.Device, int, error)
 }
 
-type SignatureDeviceServiceImpl struct {
-	repository DeviceRepository
+type CryptoFactory interface {
+	CreateMarshaller(input domain.AlgorithmType) (crypto.AlgorithmMarshaller, error)
+	GenerateAlgorithm(input domain.AlgorithmType) (crypto.Signer, error)
 }
 
-func NewDeviceService(repository DeviceRepository) *SignatureDeviceServiceImpl {
+type SignatureDeviceServiceImpl struct {
+	repository DeviceRepository
+	factory    CryptoFactory
+}
+
+func NewDeviceService(repository DeviceRepository, factory CryptoFactory) *SignatureDeviceServiceImpl {
 	return &SignatureDeviceServiceImpl{
 		repository: repository,
+		factory:    factory,
 	}
 }
 
@@ -70,12 +77,12 @@ func (s *SignatureDeviceServiceImpl) Save(input *domain.Device) error {
 }
 
 func (s *SignatureDeviceServiceImpl) createAlgorithmForType(algorithmType domain.AlgorithmType) ([]byte, []byte, error) {
-	generatedAlgorithm, err := crypto.GenerateAlgorithm(algorithmType)
+	generatedAlgorithm, err := s.factory.GenerateAlgorithm(algorithmType)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	marshaller, err := crypto.CreateMarshaller(algorithmType)
+	marshaller, err := s.factory.CreateMarshaller(algorithmType)
 	if err != nil {
 		return nil, nil, err
 	}
