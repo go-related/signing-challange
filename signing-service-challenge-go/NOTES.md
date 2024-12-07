@@ -3,7 +3,7 @@
 ### How to run
     I have added a makefile for building and runing. also for simplicity i added the ability to add some mock data.
 
-```
+``` shell
     make build
      
     #run tests
@@ -23,29 +23,40 @@
     <br>
     Get devices through pagination starting from page 1, both are required <br/>
     sample:
-    ``` curl --location 'http://localhost:8080/api/v0/signature-devices?pageNr=1&pageSize=4'```
+    ``` shell
+      curl --location 'http://localhost:8080/api/v0/signature-devices?pageNr=1&pageSize=4'
+    ```
   
   - Get By ID
     <br>
     Get devices by id <br/>
-    sample: ```curl --location 'http://localhost:8080/api/v0/signature-device/3 ```
-      <br/>
+    sample: 
+    ``` shell
+    curl --location 'http://localhost:8080/api/v0/signature-device/3 
+    ```
+    <br/>
   
   - Create
     <br>
     Create a device
-     <br>sample: ```curl --location 'http://localhost:8080/api/v0/signature-device/3 ```
+     <br>sample: 
+    ``` shell
+    curl --location 'http://localhost:8080/api/v0/signature-device/3 
+    ```
  
 - Signing-Creation
   - Get All
     <br>Get signatures through pagination starting from page 1, all parameters  are required <br/>
-    sample: ```curl --location 'http://localhost:8080/api/v0/signing-creations?deviceId=4&pageNr=1&pageSize=10'```  
+    sample: 
+    ``` shell
+    curl --location 'http://localhost:8080/api/v0/signing-creations?deviceId=4&pageNr=1&pageSize=10'
+    ```  
     <br/>
   
   - Sign
      <br>Sing Data endpoint. Both data and device_id are required.
       <br> sample:
-    ```
+    ``` shell
     curl --location 'http://localhost:8080/api/v0/signing-creation' \
     --header 'Content-Type: application/json' \
     --data '{
