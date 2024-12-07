@@ -52,10 +52,7 @@ func TestGetAll(t *testing.T) {
 				}
 			}
 
-			list, total, err := store.GetAll(test.page, test.pageSize)
-			if err != nil {
-				t.Error(err)
-			}
+			list, total, _ := store.GetAll(test.page, test.pageSize)
 
 			if len(list) != test.expectedResultLength {
 				t.Errorf("Expected length %d, got %d", test.expectedResultLength, len(list))

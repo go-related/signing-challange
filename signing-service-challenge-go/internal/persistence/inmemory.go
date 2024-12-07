@@ -21,7 +21,7 @@ func NewInMemoryStorage() *InMemoryStorage {
 func (in *InMemoryStorage) GetAll(pageNr int, pageSize int) ([]*domain.SignatureDevice, int, error) {
 	startIndex := (pageNr - 1) * pageSize
 	if startIndex >= len(in.signatureDevices) {
-		return []*domain.SignatureDevice{}, len(in.signatureDevices), nil // No devices to return
+		return []*domain.SignatureDevice{}, len(in.signatureDevices), services.NewDBError("invalid page number")
 	}
 	endIndex := startIndex + pageSize
 	if endIndex > len(in.signatureDevices) {

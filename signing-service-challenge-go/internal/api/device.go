@@ -5,6 +5,7 @@ import (
 	"github.com/fiskaly/coding-challenges/signing-service-challenge/internal/domain"
 	"net/http"
 	"strconv"
+	"strings"
 )
 
 type SigningDeviceDTO struct {
@@ -15,7 +16,7 @@ type SigningDeviceDTO struct {
 }
 
 func (s *Server) CreateSigningDevice(response http.ResponseWriter, request *http.Request) {
-	if request.Method != http.MethodGet {
+	if request.Method != http.MethodPost {
 		WriteErrorResponse(response, http.StatusMethodNotAllowed, nil, http.StatusText(http.StatusMethodNotAllowed))
 		return
 	}
@@ -37,7 +38,9 @@ func (s *Server) CreateSigningDevice(response http.ResponseWriter, request *http
 		WriteErrorResponse(response, http.StatusInternalServerError, err, http.StatusText(http.StatusInternalServerError))
 		return
 	}
-	WriteAPIResponse(response, http.StatusCreated, result)
+
+	output := convertDeviceDomainModelToDTO(result)
+	WriteAPIResponse(response, http.StatusCreated, output)
 }
 
 func (s *Server) GetSigningDeviceById(response http.ResponseWriter, request *http.Request) {
@@ -46,18 +49,29 @@ func (s *Server) GetSigningDeviceById(response http.ResponseWriter, request *htt
 		return
 	}
 
-	id := request.URL.Query().Get("id")
-	device, err := s.deviceService.GetById(id)
+	path := strings.TrimPrefix(request.URL.Path, "/api/v0/signature-device/")
+	// Validate and extract the ID
+	if path == "" || strings.Contains(path, "/") {
+		http.Error(response, "Invalid or missing ID", http.StatusBadRequest)
+		return
+	}
+
+	result, err := s.deviceService.GetById(path)
 	if err != nil {
 		WriteErrorResponse(response, http.StatusInternalServerError, err, http.StatusText(http.StatusInternalServerError))
 		return
 	}
 
-	result := convertDeviceDomainModelToDTO(device)
-	WriteAPIResponse(response, http.StatusOK, result)
+	output := convertDeviceDomainModelToDTO(result)
+	WriteAPIResponse(response, http.StatusOK, output)
 }
 
 func (s *Server) GetAllDevices(response http.ResponseWriter, request *http.Request) {
+	if request.Method != http.MethodGet {
+		WriteErrorResponse(response, http.StatusMethodNotAllowed, nil, http.StatusText(http.StatusMethodNotAllowed))
+		return
+	}
+
 	pageNr, err := strconv.Atoi(request.URL.Query().Get("pageNr"))
 	if err != nil || pageNr < 1 {
 		WriteErrorResponse(response, http.StatusBadRequest, err, "Invalid or missing pageNr")
@@ -75,9 +89,9 @@ func (s *Server) GetAllDevices(response http.ResponseWriter, request *http.Reque
 		WriteErrorResponse(response, http.StatusInternalServerError, err, "Failed to retrieve devices")
 		return
 	}
-	result := convertDeviceListDomainModelToDTO(&devices, pageNr, pageSize, totalCount)
 
-	WriteAPIResponse(response, http.StatusOK, result)
+	output := convertDeviceListDomainModelToDTO(&devices, pageNr, pageSize, totalCount)
+	WriteAPIResponse(response, http.StatusOK, output)
 }
 
 func convertDeviceDTOtoDomainModel(input *SigningDeviceDTO) *domain.SignatureDevice {
