@@ -1,3 +1,0 @@
-This is just a simple text file.
-
-When uploaded it will import this file as a string.
