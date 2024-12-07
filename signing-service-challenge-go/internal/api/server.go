@@ -2,30 +2,39 @@ package api
 
 import (
 	"encoding/json"
+	"errors"
+	"github.com/fiskaly/coding-challenges/signing-service-challenge/internal/services"
+	signaturecreation "github.com/fiskaly/coding-challenges/signing-service-challenge/internal/services/signature-creation"
+	signaturedevice "github.com/fiskaly/coding-challenges/signing-service-challenge/internal/services/signature-device"
 	"github.com/sirupsen/logrus"
 	"net/http"
 )
 
-// Response is the generic API response container.
-type Response struct {
-	Data interface{} `json:"data"`
+type Response[T any] struct {
+	Data T      `json:"data"`
+	Err  string `json:"error_message"`
 }
 
-// ErrorResponse is the generic error API response container.
-type ErrorResponse struct {
-	Errors []string `json:"errors"`
+type PaginatedResponse[T any] struct {
+	PageNumber int `json:"page_number"`
+	PageSize   int `json:"page_size"`
+	Total      int `json:"total"`
+	Items      []T `json:"items"`
 }
 
 // Server manages HTTP requests and dispatches them to the appropriate services.
 type Server struct {
-	listenAddress string
+	listenAddress    string
+	deviceService    signaturedevice.SignatureDeviceService
+	signatureService signaturecreation.SignatureService
 }
 
 // NewServer is a factory to instantiate a new Server.
-func NewServer(listenAddress string) *Server {
+func NewServer(listenAddress string, deviceService signaturedevice.SignatureDeviceService, signatureService signaturecreation.SignatureService) *Server {
 	return &Server{
-		listenAddress: listenAddress,
-		// TODO: add services / further dependencies here ...
+		listenAddress:    listenAddress,
+		deviceService:    deviceService,
+		signatureService: signatureService,
 	}
 }
 
@@ -35,32 +44,32 @@ func (s *Server) Run() error {
 
 	mux.Handle("/api/v0/health", http.HandlerFunc(s.Health))
 
-	// TODO: register further HandlerFuncs here ...
+	//signature-devices
+	mux.Handle("/api/v0/signature-device", http.HandlerFunc(s.CreateSigningDevice))
+	mux.Handle("/api/v0/signature-device/:id", http.HandlerFunc(s.GetSigningDeviceById))
+	mux.Handle("/api/v0/signature-device/", http.HandlerFunc(s.GetAllDevices))
 
 	return http.ListenAndServe(s.listenAddress, mux)
 }
 
-// WriteInternalError writes a default internal error message as an HTTP response.
-func WriteInternalError(w http.ResponseWriter) {
-	w.WriteHeader(http.StatusInternalServerError)
-	_, err := w.Write([]byte(http.StatusText(http.StatusInternalServerError)))
-	if err != nil {
-		logrus.WithError(err).Error("failed to write internal response")
-	}
-}
-
 // WriteErrorResponse takes an HTTP status code and a slice of errors
 // and writes those as an HTTP error response in a structured format.
-func WriteErrorResponse(w http.ResponseWriter, code int, errors []string) {
-	w.WriteHeader(code)
+func WriteErrorResponse(w http.ResponseWriter, status int, err error, message string) {
 
-	errorResponse := ErrorResponse{
-		Errors: errors,
+	// we check if the error type is like this than meas it's a bad request
+	var badRequest *services.ServiceError
+	if errors.As(err, &badRequest) {
+		status = badRequest.Status
+		message = err.Error()
 	}
 
-	bytes, err := json.Marshal(errorResponse)
+	w.WriteHeader(status)
+
+	bytes, err := json.Marshal(Response[string]{
+		Err: message,
+	})
 	if err != nil {
-		WriteInternalError(w)
+		logrus.WithError(err).Error("error marshalling error response")
 	}
 
 	_, err = w.Write(bytes)
@@ -71,16 +80,17 @@ func WriteErrorResponse(w http.ResponseWriter, code int, errors []string) {
 
 // WriteAPIResponse takes an HTTP status code and a generic data struct
 // and writes those as an HTTP response in a structured format.
-func WriteAPIResponse(w http.ResponseWriter, code int, data interface{}) {
-	w.WriteHeader(code)
+func WriteAPIResponse[T any](w http.ResponseWriter, statusCode int, data T) {
+	w.WriteHeader(statusCode)
 
-	response := Response{
+	response := Response[T]{
 		Data: data,
 	}
 
 	bytes, err := json.MarshalIndent(response, "", "  ")
 	if err != nil {
-		WriteInternalError(w)
+		logrus.WithError(err).Error("failed to marshal response")
+		WriteErrorResponse(w, http.StatusInternalServerError, err, "failed to marshal response")
 	}
 
 	_, err = w.Write(bytes)
