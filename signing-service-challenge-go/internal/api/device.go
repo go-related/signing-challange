@@ -9,7 +9,7 @@ import (
 )
 
 type SigningDeviceDTO struct {
-	Id        string  `json:"id"`        // for simplicity we are not gonna check if this is a uuid
+	Id        string  `json:"id"`        // for simplicity, we are not going to check if this is uuid
 	Algorithm string  `json:"algorithm"` // the validation is done on the service level, so we delegate the check there
 	Label     *string `json:"label,omitempty"`
 	Counter   int     `json:"signature_counter"`
