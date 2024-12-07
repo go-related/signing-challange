@@ -16,7 +16,7 @@
     run-mock 
   ```
 
-#### Endpoints
+### Endpoints
 
 - Signing-Device
   - Get All
@@ -76,7 +76,7 @@
 ### In addition, list / retrieval operations for the resources generated in the previous operations should be made available to the customers.
     Yes i have create paginated response for both of the resources as showing below:
 
-```
+``` shell
     curl --location 'http://localhost:8080/api/v0/signature-devices?pageNr=1&pageSize=4'
     curl --location 'http://localhost:8080/api/v0/signing-creations?deviceId=3&pageNr=2&pageSize=3'
 ```
