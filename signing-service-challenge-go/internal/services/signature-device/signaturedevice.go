@@ -63,26 +63,14 @@ func (s *SignatureDeviceServiceImpl) Save(input *domain.SignatureDevice) error {
 }
 
 func (s *SignatureDeviceServiceImpl) createAlgorithmForType(algorithmType domain.AlgorithmType) ([]byte, []byte, error) {
-	switch algorithmType {
-	case domain.AlgorithmTypeECC:
-		generator := crypto.ECCGenerator{}
-		key, err := generator.Generate()
-		if err != nil {
-			return nil, nil, err
-		}
-		marshaller := crypto.NewECCMarshaler()
-		pbKey, pvKey, err := marshaller.Encode(key)
-		return pbKey, pvKey, err
-	case domain.AlgorithmTypeRSA:
-		generator := crypto.RSAGenerator{}
-		key, err := generator.Generate()
-		if err != nil {
-			return nil, nil, err
-		}
-		marshaller := crypto.NewRSAMarshaler()
-		pbKey, pvKey, err := marshaller.Marshal(key)
-		return pbKey, pvKey, err
-	default:
-		return nil, nil, services.NewServiceError(fmt.Sprintf("unknown algorithm type :%s", algorithmType), http.StatusBadRequest)
+	generatedAlgorithm, err := crypto.GenerateAlgorithm(algorithmType)
+	if err != nil {
+		return nil, nil, err
 	}
+
+	marshaller, err := crypto.CreateMarshaller(algorithmType)
+	if err != nil {
+		return nil, nil, err
+	}
+	return marshaller.Encode(generatedAlgorithm)
 }

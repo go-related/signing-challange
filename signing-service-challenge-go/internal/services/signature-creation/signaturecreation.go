@@ -100,22 +100,13 @@ func (sc *SignatureCreation) signTransaction(device *domain.SignatureDevice, dat
 }
 
 func (sc *SignatureCreation) loadKeyFromDevice(device *domain.SignatureDevice) (crypto.Signer, error) {
-	switch device.AlgorithmType {
-	case domain.AlgorithmTypeRSA:
-		marshaller := crypto.NewRSAMarshaler()
-		key, err := marshaller.Unmarshal(device.PrivateKey)
-		if err != nil {
-			return nil, err
-		}
-		return key, nil
-	case domain.AlgorithmTypeECC:
-		marshaller := crypto.NewECCMarshaler()
-		key, err := marshaller.Decode(device.PrivateKey)
-		if err != nil {
-			return nil, err
-		}
-		return key, nil
-	default:
-		return nil, services.NewServiceError("invalid algorithm type registered for this device", http.StatusBadRequest)
+	marshaller, err := crypto.CreateMarshaller(device.AlgorithmType)
+	if err != nil {
+		return nil, err
 	}
+	key, err := marshaller.Decode(device.PrivateKey)
+	if err != nil {
+		return nil, err
+	}
+	return key, nil
 }

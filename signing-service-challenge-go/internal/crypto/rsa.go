@@ -56,15 +56,17 @@ func (kp *RSAKeyPair) VerifySignature(data []byte, signature []byte) error {
 type RSAMarshaler struct{}
 
 // NewRSAMarshaler creates a new RSAMarshaler.
-func NewRSAMarshaler() RSAMarshaler {
-	return RSAMarshaler{}
+func NewRSAMarshaler() *RSAMarshaler {
+	return &RSAMarshaler{}
 }
 
-// Marshal takes an RSAKeyPair and encodes it to be written on disk.
+// Encode takes an RSAKeyPair and encodes it to be written on disk.
 // It returns the public and the private key as a byte slice.
-func (m *RSAMarshaler) Marshal(keyPair *RSAKeyPair) ([]byte, []byte, error) {
-	privateKeyBytes := x509.MarshalPKCS1PrivateKey(keyPair.Private)
-	publicKeyBytes := x509.MarshalPKCS1PublicKey(keyPair.Public)
+func (m *RSAMarshaler) Encode(keyPair Signer) ([]byte, []byte, error) {
+	input := keyPair.(*RSAKeyPair)
+
+	privateKeyBytes := x509.MarshalPKCS1PrivateKey(input.Private)
+	publicKeyBytes := x509.MarshalPKCS1PublicKey(input.Public)
 
 	encodedPrivate := pem.EncodeToMemory(&pem.Block{
 		Type:  "RSA_PRIVATE_KEY",
@@ -79,8 +81,8 @@ func (m *RSAMarshaler) Marshal(keyPair *RSAKeyPair) ([]byte, []byte, error) {
 	return encodePublic, encodedPrivate, nil
 }
 
-// Unmarshal takes an encoded RSA private key and transforms it into a rsa.PrivateKey.
-func (m *RSAMarshaler) Unmarshal(privateKeyBytes []byte) (*RSAKeyPair, error) {
+// Decode takes an encoded RSA private key and transforms it into a rsa.PrivateKey.
+func (m *RSAMarshaler) Decode(privateKeyBytes []byte) (Signer, error) {
 	block, _ := pem.Decode(privateKeyBytes)
 	privateKey, err := x509.ParsePKCS1PrivateKey(block.Bytes)
 	if err != nil {
