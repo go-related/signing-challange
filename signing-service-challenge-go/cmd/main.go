@@ -4,8 +4,8 @@ import (
 	"github.com/fiskaly/coding-challenges/signing-service-challenge/internal/api"
 	"github.com/fiskaly/coding-challenges/signing-service-challenge/internal/configuration"
 	"github.com/fiskaly/coding-challenges/signing-service-challenge/internal/persistence"
-	signaturecreation "github.com/fiskaly/coding-challenges/signing-service-challenge/internal/services/signature-creation"
-	signaturedevice "github.com/fiskaly/coding-challenges/signing-service-challenge/internal/services/signature-device"
+	deviceService "github.com/fiskaly/coding-challenges/signing-service-challenge/internal/services/device"
+	signService "github.com/fiskaly/coding-challenges/signing-service-challenge/internal/services/sign"
 	"github.com/sirupsen/logrus"
 )
 
@@ -26,10 +26,10 @@ func runServer(config *configuration.Configuration) error {
 	storage := persistence.NewInMemoryStorage()
 
 	//services
-	signatureService := signaturedevice.NewDeviceService(storage)
-	signatureCreationService := signaturecreation.NewSignatureCreation(storage)
+	deviceSrv := deviceService.NewDeviceService(storage)
+	signSrv := signService.NewSignService(storage)
 
-	server := api.NewServer(config.ListenAddress, signatureService, signatureCreationService)
+	server := api.NewServer(config.ListenAddress, deviceSrv, signSrv)
 
 	logrus.Info("starting server on port " + config.ListenAddress)
 	err := server.Run()

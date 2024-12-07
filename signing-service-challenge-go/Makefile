@@ -8,6 +8,8 @@ run: build
 	lsof -ti :8080 | xargs kill -9
 	./bin/signservice
 
+test:
+	go test -race -v ./...
 
 run-mock:
 	sleep 1 # Wait for the service to start
