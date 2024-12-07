@@ -24,7 +24,7 @@
     Get devices through pagination starting from page 1, both are required <br/>
     sample:
     ``` shell
-      curl --location 'http://localhost:8080/api/v0/signature-devices?pageNr=1&pageSize=4'
+      curl --location 'http://localhost:8080/api/v0/devices?pageNr=1&pageSize=4'
     ```
   
   - Get By ID
@@ -32,7 +32,7 @@
     Get devices by id <br/>
     sample: 
     ``` shell
-    curl --location 'http://localhost:8080/api/v0/signature-device/3 
+    curl --location 'http://localhost:8080/api/v0/device/3 
     ```
     <br/>
   
@@ -41,7 +41,7 @@
     Create a device
      <br>sample: 
     ``` shell
-    curl --location 'http://localhost:8080/api/v0/signature-device/3 
+    curl --location 'http://localhost:8080/api/v0/device/3 
     ```
  
 - Signing-Creation
@@ -49,7 +49,7 @@
     <br>Get signatures through pagination starting from page 1, all parameters  are required <br/>
     sample: 
     ``` shell
-    curl --location 'http://localhost:8080/api/v0/signing-creations?deviceId=4&pageNr=1&pageSize=10'
+    curl --location 'http://localhost:8080/api/v0/signings?deviceId=4&pageNr=1&pageSize=10'
     ```  
     <br/>
   
@@ -57,7 +57,7 @@
      <br>Sing Data endpoint. Both data and device_id are required.
       <br> sample:
     ``` shell
-    curl --location 'http://localhost:8080/api/v0/signing-creation' \
+    curl --location 'http://localhost:8080/api/v0/sign' \
     --header 'Content-Type: application/json' \
     --data '{
     "device_id":"4",
@@ -77,8 +77,8 @@
     Yes i have create paginated response for both of the resources as showing below:
 
 ``` shell
-    curl --location 'http://localhost:8080/api/v0/signature-devices?pageNr=1&pageSize=4'
-    curl --location 'http://localhost:8080/api/v0/signing-creations?deviceId=3&pageNr=2&pageSize=3'
+    curl --location 'http://localhost:8080/api/v0/devices?pageNr=1&pageSize=4'
+    curl --location 'http://localhost:8080/api/v0/signings?deviceId=3&pageNr=2&pageSize=3'
 ```
 
 ### The system will be used by many concurrent clients accessing the same resources.
@@ -96,7 +96,6 @@
     As long as we have repositories that implement the required SignatureDeviceRepository and SignatureDeviceRepository respectively
 
 ### QA / Testing
-    I have written some tests for the services which contain the bussines logic,
-    but certenly we should have more coverage in a real application.
+    I have written some tests for the services, but certenly we should have more coverage in a real application.
 
 
