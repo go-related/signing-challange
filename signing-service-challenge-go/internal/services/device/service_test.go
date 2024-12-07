@@ -2,11 +2,14 @@ package device
 
 import (
 	"fmt"
-	"github.com/fiskaly/coding-challenges/signing-service-challenge/internal/domain"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
 	"strconv"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
+
+	"github.com/fiskaly/coding-challenges/signing-service-challenge/internal/domain"
+	"github.com/fiskaly/coding-challenges/signing-service-challenge/internal/services/device/mocks"
 )
 
 func TestGetAllValidity(t *testing.T) {
@@ -62,7 +65,7 @@ func TestGetAllValidity(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			// setup
-			mockRepo := new(MockDeviceRepository)
+			mockRepo := new(mocks.MockDeviceRepository)
 			if !test.expectedServiceError {
 				mockRepo.On("GetAll", test.inputPageNumber, test.inputPageSize).
 					Return(test.mockData.Devices, test.mockData.TotalCount, test.mockData.Error)
@@ -109,7 +112,7 @@ func TestGetById(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			// setup
-			mockRepo := new(MockDeviceRepository)
+			mockRepo := new(mocks.MockDeviceRepository)
 
 			mockRepo.On("FindByID", test.inputDeviceId).
 				Return(test.mockDevice, test.mockError)
@@ -190,7 +193,7 @@ func TestSave(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			mockRepo := new(MockDeviceRepository)
+			mockRepo := new(mocks.MockDeviceRepository)
 			service := NewDeviceService(mockRepo)
 			if !test.expectedServiceError {
 				mockRepo.On("Save", mock.Anything).Return(test.mockError)
@@ -230,26 +233,4 @@ func newMockData(mockCount int, totalCount int, err error) mockData {
 		TotalCount: totalCount,
 		Error:      err,
 	}
-}
-
-type MockDeviceRepository struct {
-	mock.Mock
-}
-
-func (m *MockDeviceRepository) Save(device domain.Device) error {
-	args := m.Called(device)
-	return args.Error(0)
-}
-
-func (m *MockDeviceRepository) FindByID(id string) (*domain.Device, error) {
-	args := m.Called(id)
-	if args.Get(0) == nil {
-		return nil, args.Error(1)
-	}
-	return args.Get(0).(*domain.Device), args.Error(1)
-}
-
-func (m *MockDeviceRepository) GetAll(pageNr int, pageSize int) ([]*domain.Device, int, error) {
-	args := m.Called(pageNr, pageSize)
-	return args.Get(0).([]*domain.Device), args.Int(1), args.Error(2)
 }

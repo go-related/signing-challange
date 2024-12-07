@@ -1,9 +1,10 @@
 package persistence
 
 import (
+	"github.com/google/uuid"
+
 	"github.com/fiskaly/coding-challenges/signing-service-challenge/internal/domain"
 	"github.com/fiskaly/coding-challenges/signing-service-challenge/internal/services"
-	"github.com/google/uuid"
 )
 
 type InMemoryStorage struct {

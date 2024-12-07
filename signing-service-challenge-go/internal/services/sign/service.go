@@ -3,11 +3,12 @@ package sign
 import (
 	"encoding/base64"
 	"fmt"
+	"net/http"
+	"sync"
+
 	"github.com/fiskaly/coding-challenges/signing-service-challenge/internal/crypto"
 	"github.com/fiskaly/coding-challenges/signing-service-challenge/internal/domain"
 	"github.com/fiskaly/coding-challenges/signing-service-challenge/internal/services"
-	"net/http"
-	"sync"
 )
 
 type SignService interface {
@@ -22,15 +23,22 @@ type SignRepository interface {
 	SaveDeviceCounterAndLastEncoded(id string, counter int64, currentSignature, data string) error
 }
 
-type SignServiceImpl struct {
-	repository SignRepository
-	counterMu  sync.Mutex
+type CryptoFactory interface {
+	CreateMarshaller(input domain.AlgorithmType) (crypto.AlgorithmMarshaller, error)
+	GenerateAlgorithm(input domain.AlgorithmType) (crypto.Signer, error)
 }
 
-func NewSignService(repository SignRepository) *SignServiceImpl {
+type SignServiceImpl struct {
+	repository    SignRepository
+	cryptoFactory CryptoFactory
+	counterMu     sync.Mutex
+}
+
+func NewSignService(repository SignRepository, factory CryptoFactory) *SignServiceImpl {
 	return &SignServiceImpl{
-		repository: repository,
-		counterMu:  sync.Mutex{},
+		repository:    repository,
+		cryptoFactory: factory,
+		counterMu:     sync.Mutex{},
 	}
 }
 func (sc *SignServiceImpl) GetAllSignings(deviceId string, pageNr int, pageSize int) ([]*domain.Signings, int, error) {
@@ -107,7 +115,7 @@ func (sc *SignServiceImpl) signTransaction(device *domain.Device, data []byte) (
 }
 
 func (sc *SignServiceImpl) loadKeyFromDevice(device *domain.Device) (crypto.Signer, error) {
-	marshaller, err := crypto.CreateMarshaller(device.AlgorithmType)
+	marshaller, err := sc.cryptoFactory.CreateMarshaller(device.AlgorithmType)
 	if err != nil {
 		return nil, err
 	}

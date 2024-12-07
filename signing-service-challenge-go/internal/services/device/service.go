@@ -2,10 +2,11 @@ package device
 
 import (
 	"fmt"
+	"net/http"
+
 	"github.com/fiskaly/coding-challenges/signing-service-challenge/internal/crypto"
 	"github.com/fiskaly/coding-challenges/signing-service-challenge/internal/domain"
 	"github.com/fiskaly/coding-challenges/signing-service-challenge/internal/services"
-	"net/http"
 )
 
 type DeviceService interface {

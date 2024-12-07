@@ -2,9 +2,10 @@ package api
 
 import (
 	"encoding/json"
-	"github.com/fiskaly/coding-challenges/signing-service-challenge/internal/domain"
 	"net/http"
 	"strconv"
+
+	"github.com/fiskaly/coding-challenges/signing-service-challenge/internal/domain"
 )
 
 type SigningInputDTO struct {

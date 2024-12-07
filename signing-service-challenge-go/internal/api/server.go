@@ -3,11 +3,13 @@ package api
 import (
 	"encoding/json"
 	"errors"
+	"net/http"
+
+	"github.com/sirupsen/logrus"
+
 	"github.com/fiskaly/coding-challenges/signing-service-challenge/internal/services"
 	deviceService "github.com/fiskaly/coding-challenges/signing-service-challenge/internal/services/device"
 	signService "github.com/fiskaly/coding-challenges/signing-service-challenge/internal/services/sign"
-	"github.com/sirupsen/logrus"
-	"net/http"
 )
 
 type Response[T any] struct {

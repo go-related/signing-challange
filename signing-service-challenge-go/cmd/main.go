@@ -1,12 +1,14 @@
 package main
 
 import (
+	"github.com/sirupsen/logrus"
+
 	"github.com/fiskaly/coding-challenges/signing-service-challenge/internal/api"
 	"github.com/fiskaly/coding-challenges/signing-service-challenge/internal/configuration"
+	"github.com/fiskaly/coding-challenges/signing-service-challenge/internal/crypto"
 	"github.com/fiskaly/coding-challenges/signing-service-challenge/internal/persistence"
 	deviceService "github.com/fiskaly/coding-challenges/signing-service-challenge/internal/services/device"
 	signService "github.com/fiskaly/coding-challenges/signing-service-challenge/internal/services/sign"
-	"github.com/sirupsen/logrus"
 )
 
 func main() {
@@ -26,8 +28,9 @@ func runServer(config *configuration.Configuration) error {
 	storage := persistence.NewInMemoryStorage()
 
 	//services
+	factory := crypto.NewFactory()
 	deviceSrv := deviceService.NewDeviceService(storage)
-	signSrv := signService.NewSignService(storage)
+	signSrv := signService.NewSignService(storage, factory)
 
 	server := api.NewServer(config.ListenAddress, deviceSrv, signSrv)
 

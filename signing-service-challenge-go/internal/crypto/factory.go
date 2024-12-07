@@ -2,6 +2,7 @@ package crypto
 
 import (
 	"errors"
+
 	"github.com/fiskaly/coding-challenges/signing-service-challenge/internal/domain"
 )
 
@@ -10,7 +11,13 @@ type AlgorithmMarshaller interface {
 	Decode(input []byte) (Signer, error)
 }
 
-func CreateMarshaller(input domain.AlgorithmType) (AlgorithmMarshaller, error) {
+type Factory struct{}
+
+func NewFactory() *Factory {
+	return &Factory{}
+}
+
+func (f *Factory) CreateMarshaller(input domain.AlgorithmType) (AlgorithmMarshaller, error) {
 	switch input {
 	case domain.AlgorithmTypeECC:
 		return NewECCMarshaler(), nil
@@ -21,7 +28,7 @@ func CreateMarshaller(input domain.AlgorithmType) (AlgorithmMarshaller, error) {
 	}
 }
 
-func GenerateAlgorithm(input domain.AlgorithmType) (Signer, error) {
+func (f *Factory) GenerateAlgorithm(input domain.AlgorithmType) (Signer, error) {
 	switch input {
 	case domain.AlgorithmTypeECC:
 		var generator ECCGenerator
