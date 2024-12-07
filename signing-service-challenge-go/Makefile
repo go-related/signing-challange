@@ -2,6 +2,7 @@ build:
 	mkdir -p ./bin
 	go build -o ./bin/signservice cmd/main.go
 
+
 run: build
 	chmod +x ./bin/signservice
 	lsof -ti :8080 | xargs kill -9
@@ -9,7 +10,7 @@ run: build
 
 
 run-mock:
-	sleep 2 # Wait for the service to start
+	sleep 1 # Wait for the service to start
 	curl --location 'http://localhost:8080/api/v0/signature-device' \
 		--header 'Content-Type: application/json' \
 		--data '{"id":"1","algorithm":"ECC"}' &

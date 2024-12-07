@@ -82,3 +82,5 @@ As we are in the business of compliance technology, we need to make sure that ou
 #### Credits
 
 This challenge is heavily influenced by the regulations for `KassenSichV` (Germany) as well as the `RKSV` (Austria) and our solutions for them.
+
+[Solution Notes](NOTES.md)
