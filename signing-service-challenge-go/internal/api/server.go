@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"github.com/sirupsen/logrus"
 	"net/http"
 )
 
@@ -42,7 +43,10 @@ func (s *Server) Run() error {
 // WriteInternalError writes a default internal error message as an HTTP response.
 func WriteInternalError(w http.ResponseWriter) {
 	w.WriteHeader(http.StatusInternalServerError)
-	w.Write([]byte(http.StatusText(http.StatusInternalServerError)))
+	_, err := w.Write([]byte(http.StatusText(http.StatusInternalServerError)))
+	if err != nil {
+		logrus.WithError(err).Error("failed to write internal response")
+	}
 }
 
 // WriteErrorResponse takes an HTTP status code and a slice of errors
@@ -59,7 +63,10 @@ func WriteErrorResponse(w http.ResponseWriter, code int, errors []string) {
 		WriteInternalError(w)
 	}
 
-	w.Write(bytes)
+	_, err = w.Write(bytes)
+	if err != nil {
+		logrus.WithError(err).Error("failed to write error response")
+	}
 }
 
 // WriteAPIResponse takes an HTTP status code and a generic data struct
@@ -76,5 +83,8 @@ func WriteAPIResponse(w http.ResponseWriter, code int, data interface{}) {
 		WriteInternalError(w)
 	}
 
-	w.Write(bytes)
+	_, err = w.Write(bytes)
+	if err != nil {
+		logrus.WithError(err).Error("failed to write api response")
+	}
 }

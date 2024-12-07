@@ -1,9 +1,8 @@
 package main
 
 import (
+	"github.com/fiskaly/coding-challenges/signing-service-challenge/internal/api"
 	"log"
-
-	"github.com/fiskaly/coding-challenges/signing-service-challenge/api"
 )
 
 const (

@@ -1,15 +1,55 @@
 package crypto
 
 import (
+	"crypto"
+	"crypto/rand"
 	"crypto/rsa"
+	"crypto/sha256"
 	"crypto/x509"
 	"encoding/pem"
+	"fmt"
 )
 
 // RSAKeyPair is a DTO that holds RSA private and public keys.
 type RSAKeyPair struct {
 	Public  *rsa.PublicKey
 	Private *rsa.PrivateKey
+}
+
+func (kp *RSAKeyPair) Sign(data []byte) ([]byte, error) {
+	hash := sha256.Sum256(data)
+	signature, err := rsa.SignPSS(
+		rand.Reader,
+		kp.Private,
+		crypto.SHA256, // we might need to take this from some configuration in the
+		hash[:],
+		&rsa.PSSOptions{
+			SaltLength: rsa.PSSSaltLengthAuto,
+		},
+	)
+	return signature, err
+}
+
+func (kp *RSAKeyPair) VerifySignature(data []byte, signature []byte) error {
+
+	hash := sha256.Sum256(data)
+
+	// Verify the signature
+	err := rsa.VerifyPSS(
+		kp.Public,
+		crypto.SHA256,
+		hash[:],
+		signature,
+		&rsa.PSSOptions{
+			SaltLength: rsa.PSSSaltLengthAuto,
+		},
+	)
+
+	if err != nil {
+		return fmt.Errorf("signature verification failed: %v", err)
+	}
+
+	return nil
 }
 
 // RSAMarshaler can encode and decode an RSA key pair.
@@ -22,7 +62,7 @@ func NewRSAMarshaler() RSAMarshaler {
 
 // Marshal takes an RSAKeyPair and encodes it to be written on disk.
 // It returns the public and the private key as a byte slice.
-func (m *RSAMarshaler) Marshal(keyPair RSAKeyPair) ([]byte, []byte, error) {
+func (m *RSAMarshaler) Marshal(keyPair *RSAKeyPair) ([]byte, []byte, error) {
 	privateKeyBytes := x509.MarshalPKCS1PrivateKey(keyPair.Private)
 	publicKeyBytes := x509.MarshalPKCS1PublicKey(keyPair.Public)
 
