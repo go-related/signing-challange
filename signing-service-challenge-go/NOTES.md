@@ -32,7 +32,7 @@
     Get devices by id <br/>
     sample: 
     ``` shell
-    curl --location 'http://localhost:8080/api/v0/device/3 
+    curl --location 'http://localhost:8080/api/v0/device/3' 
     ```
     <br/>
   
@@ -41,7 +41,9 @@
     Create a device
      <br>sample: 
     ``` shell
-    curl --location 'http://localhost:8080/api/v0/device/3 
+    curl --location 'http://localhost:8080/api/v0/device' \
+    --header 'Content-Type: application/json' \
+    --data '{ "id":"15", "algorithm":"RSA", "label":"testing label"}'
     ```
  
 - Signing-Creation
