@@ -50,7 +50,7 @@ func (s *Server) GetDeviceById(response http.ResponseWriter, request *http.Reque
 		return
 	}
 
-	path := strings.TrimPrefix(request.URL.Path, "/api/v0/signature-device/")
+	path := strings.TrimPrefix(request.URL.Path, "/api/v0/device/")
 	// Validate and extract the ID
 	if path == "" || strings.Contains(path, "/") {
 		http.Error(response, "Invalid or missing ID", http.StatusBadRequest)
@@ -125,7 +125,9 @@ func convertDeviceListDomainModelToDTO(input *[]*domain.Device, page, pageSize, 
 	}
 	var results []DeviceDTO
 	for _, device := range *input {
-		results = append(results, *convertDeviceDomainModelToDTO(device))
+		if device != nil {
+			results = append(results, *convertDeviceDomainModelToDTO(device))
+		}
 	}
 	return &PaginatedResponse[DeviceDTO]{
 		Items:      results,

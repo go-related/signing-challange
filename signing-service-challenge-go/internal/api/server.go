@@ -65,6 +65,13 @@ func WriteErrorResponse(w http.ResponseWriter, status int, err error, message st
 	if err != nil {
 		logrus.Error(err)
 
+		// custom db-level error
+		var dbError *services.DBError
+		if errors.As(err, &dbError) {
+			status = http.StatusBadRequest
+			message = err.Error()
+		}
+
 		// validation error
 		var badRequest *services.ServiceError
 		if errors.As(err, &badRequest) {
@@ -72,12 +79,6 @@ func WriteErrorResponse(w http.ResponseWriter, status int, err error, message st
 			message = err.Error()
 		}
 
-		// custom db-level error
-		var dbError *services.DBError
-		if errors.As(err, &dbError) {
-			status = http.StatusBadRequest
-			message = err.Error()
-		}
 	}
 
 	w.WriteHeader(status)

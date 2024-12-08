@@ -48,7 +48,7 @@ func (in *InMemoryStorage) GetAll(pageNr int, pageSize int) ([]*domain.Device, i
 
 func (in *InMemoryStorage) GetAllSignings(deviceId string, pageNr int, pageSize int) ([]*domain.Signings, int, error) {
 	creationsList, exist := in.signingsData[deviceId]
-	if !exist {
+	if !exist || creationsList == nil || len(*creationsList) == 0 {
 		return nil, 0, nil
 	}
 	creations := *creationsList

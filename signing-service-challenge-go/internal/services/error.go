@@ -2,7 +2,6 @@ package services
 
 import (
 	"fmt"
-	"net/http"
 )
 
 type ServiceError struct {
@@ -26,6 +25,6 @@ func (r *DBError) Error() string {
 	return fmt.Sprintf("error: %v", r.msg)
 }
 
-func NewDBError(msg string) *ServiceError {
-	return &ServiceError{msg: msg, Status: http.StatusInternalServerError}
+func NewDBError(msg string) *DBError {
+	return &DBError{msg: msg}
 }
