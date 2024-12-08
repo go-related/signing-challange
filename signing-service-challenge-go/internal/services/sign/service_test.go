@@ -200,7 +200,7 @@ func generateDeviceModel(t *testing.T, id string, counter int64, tp domain.Algor
 	if err != nil {
 		t.Error(err)
 	}
-	pbytes, privateBytes, err := marshaller.Encode(algorithm)
+	publicBytes, privateBytes, err := marshaller.Encode(algorithm)
 	if err != nil {
 		t.Error(err)
 	}
@@ -221,7 +221,7 @@ func generateDeviceModel(t *testing.T, id string, counter int64, tp domain.Algor
 		ID:            id,
 		AlgorithmType: tp,
 		Counter:       counter,
-		PublicKey:     pbytes,
+		PublicKey:     publicBytes,
 		PrivateKey:    privateBytes,
 	}, currentSignatureEncoded, signedData
 }
