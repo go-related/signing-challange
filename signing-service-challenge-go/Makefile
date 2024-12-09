@@ -11,8 +11,9 @@ run: build
 test:
 	go test -race -v ./...
 
-run-mock:
+run-mock-devices:
 	sleep 1 # Wait for the service to start
+
 	curl --location 'http://localhost:8080/api/v0/device' \
 		--header 'Content-Type: application/json' \
 		--data '{"id":"1","algorithm":"ECC"}' &
@@ -20,7 +21,10 @@ run-mock:
 	curl --location 'http://localhost:8080/api/v0/device' \
 		--header 'Content-Type: application/json' \
 		--data '{"id":"2","algorithm":"RSA"}' &
+	wait
 
+
+run-mock-signs:
 	curl --location 'http://localhost:8080/api/v0/sign' \
 		--header 'Content-Type: application/json' \
 		--data '{"device_id":"1","data":"test 1 with alg: 1 "}' &
@@ -53,3 +57,7 @@ run-mock:
 		--header 'Content-Type: application/json' \
 		--data '{"device_id":"2","data":"test 4 with alg: 2 "}' &
 	wait # Wait for all background tasks to complete
+
+run-mock: run-mock-devices run-mock-signs
+
+
