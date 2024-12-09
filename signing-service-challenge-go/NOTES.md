@@ -84,8 +84,8 @@
 ```
 
 ### The system will be used by many concurrent clients accessing the same resources.
-    I haven't implemented the sync in the inmemory storage since this is supposed to be a simple solution,
-    but i have implemented locking mechanism in service layer.
+    I have implemented locking in inmemory and in the service layer when it is need. so we should be in theory be able to 
+    handle concurrent calls correctly
 
 ### The signature_counter has to be strictly monotonically increasing and ideally without any gaps.
     Yes i belive i have achieved this by having a lock from getting counter to storing it this counter.
